@@ -27,4 +27,4 @@ for a in appts:
 apt_df = pd.DataFrame(apptDict)
 
 # Save to json
-apt_df.to_json("calendar.json", orient='records')
+apt_df.to_json("data/calendar.json", orient='records')
