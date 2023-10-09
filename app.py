@@ -1,20 +1,23 @@
 import streamlit as st
-from streamlit_calendar import calendar
-import json
+import home
+import login
 
-calendar_options = {
-    "headerToolbar": {
-        "left": "today prev,next",
-        "center": "title",
-        "right": "dayGridDay,dayGridWeek,dayGridMonth",
-    },
-    "slotMinTime": "08:00:00",
-    "slotMaxTime": "20:00:00",
-    "initialView": "dayGridMonth",
-}
+st.header('Kasada Calendar', divider='rainbow')
 
-with open('data/calendar.json') as f:
-    calendar_events = json.load(f)
+# Initialize auth session variable
+if 'auth' not in st.session_state:
+    st.session_state.auth = False
 
-calendar = calendar(events=calendar_events, options=calendar_options)
-# st.write(calendar)
+# Check if user authentication
+if not st.session_state.auth:
+    # Render login page
+    st.session_state.auth = login.authenticate()
+
+else:
+    # Add a logout button
+    if st.button('Logout'):
+        st.write("Logging out")
+        st.session_state.auth = False
+    
+    # Render calendar component
+    home.calendar_view()
