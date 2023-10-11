@@ -1,5 +1,6 @@
-import win32com.client
+import win32com.client, datetime
 from dateutil.parser import *
+from datetime import date
 import pandas as pd
 
 # Access Outlook and get the events from the calendar
@@ -10,6 +11,13 @@ appts = ns.GetDefaultFolder(9).Items
 # Sort events by occurence and include recurring events
 appts.Sort("[Start]")
 appts.IncludeRecurrences = "True"
+
+# Filter date range
+begin = date.today() - datetime.timedelta(days=30)
+begin = begin.strftime("%m/%d/%Y")
+end = date.today() + datetime.timedelta(days=60)
+end = end.strftime("%m/%d/%Y")
+appts = appts.Restrict(f"[Start] >= '{begin}' AND [END] <= '{end}'")
 
 # Populate dictionary of meetings
 apptDict = []
