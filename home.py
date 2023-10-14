@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_calendar import calendar
 import json
+import requests
 
 # Calendar page
 def calendar_view():
@@ -15,9 +16,12 @@ def calendar_view():
         "initialView": "dayGridMonth",
     }
 
-    # Load all events in calendar data
-    with open('data/calendar.json') as file:
-        calendar_events = json.load(file)
+    # Load key
+    payload = {"key": st.secrets["KEY"]}
+    
+    headers = {'Content-type': 'application/json'}
+    r = requests.post('https://kasada.pythonanywhere.com/get-events', json=payload, headers=headers)
+    calendar_events = r.json()
 
     # Render the calendar view
     calendar_view = calendar(events=calendar_events, options=calendar_options)
