@@ -1,4 +1,5 @@
 .vscode
+.streamlit
 data/
 __pycache__/
 
