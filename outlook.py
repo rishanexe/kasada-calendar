@@ -81,4 +81,4 @@ if __name__ == '__main__':
     try:
         run()
     except Exception as err:
-        logging.info(str(err))
+        logging.error(str(err))
