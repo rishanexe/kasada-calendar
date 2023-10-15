@@ -4,3 +4,5 @@ data/
 __pycache__/
 
 hasher.py
+*.key
+data/calendar.json
