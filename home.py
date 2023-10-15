@@ -2,6 +2,7 @@ import streamlit as st
 from streamlit_calendar import calendar
 import json
 import requests
+from cryptography.fernet import Fernet
 
 # Calendar page
 def calendar_view():
@@ -17,11 +18,14 @@ def calendar_view():
     }
 
     # Load key
-    payload = {"key": st.secrets["KEY"]}
-    
+    payload = {"key": st.secrets["API_KEY"]}
     headers = {'Content-type': 'application/json'}
     r = requests.post('https://kasada.pythonanywhere.com/get-events', json=payload, headers=headers)
     calendar_events = r.json()
+
+    # DECRYPT
+    fernet = Fernet(st.secrets["CRYPTO_KEY"])
+    calendar_events = fernet.decrypt(calendar_events["data"])
 
     # Render the calendar view
     calendar_view = calendar(events=calendar_events, options=calendar_options)

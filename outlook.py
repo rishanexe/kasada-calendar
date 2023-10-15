@@ -2,37 +2,78 @@ import win32com.client, datetime
 from dateutil.parser import *
 from datetime import date
 import pandas as pd
+from cryptography.fernet import Fernet
+import logging
+import requests
 
-# Access Outlook and get the events from the calendar
-Outlook = win32com.client.Dispatch("Outlook.Application")
-ns = Outlook.GetNamespace("MAPI")
-appts = ns.GetDefaultFolder(9).Items
+logging.basicConfig(filename='data/log.log', filemode='a', format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s', level=logging.INFO)
 
-# Sort events by occurence and include recurring events
-appts.Sort("[Start]")
-appts.IncludeRecurrences = "True"
 
-# Filter date range
-begin = date.today() - datetime.timedelta(days=30)
-begin = begin.strftime("%m/%d/%Y")
-end = date.today() + datetime.timedelta(days=60)
-end = end.strftime("%m/%d/%Y")
-appts = appts.Restrict(f"[Start] >= '{begin}' AND [END] <= '{end}'")
+def run():
+    # Access Outlook and get the events from the calendar
+    logging.info("Access Outlook and get the events from the calendar")
+    Outlook = win32com.client.Dispatch("Outlook.Application")
+    ns = Outlook.GetNamespace("MAPI")
+    appts = ns.GetDefaultFolder(9).Items
 
-# Populate dictionary of meetings
-apptDict = []
-for a in appts:
-    start_date = parse(str(a.Start))
-    end_date = parse(str(a.End))
+    # Sort events by occurence and include recurring events
+    logging.info("Sort events by occurence and include recurring events")
+    appts.Sort("[Start]")
+    appts.IncludeRecurrences = "True"
 
-    apptDict.append({
-        "title": str(a.Subject),
-        "start": start_date.strftime("%Y-%m-%d %H:%M:%S"),
-        "end": end_date.strftime("%Y-%m-%d %H:%M:%S"),
-    })
+    # Filter date range
+    logging.info("Filter date range")
+    begin = date.today() - datetime.timedelta(days=30)
+    begin = begin.strftime("%m/%d/%Y")
+    end = date.today() + datetime.timedelta(days=60)
+    end = end.strftime("%m/%d/%Y")
+    appts = appts.Restrict(f"[Start] >= '{begin}' AND [END] <= '{end}'")
 
-# Convert dictionary to dataframe
-apt_df = pd.DataFrame(apptDict)
+    # Populate dictionary of meetings
+    logging.info("Populate dictionary of meetings")
+    apptDict = []
+    for a in appts:
+        start_date = parse(str(a.Start))
+        end_date = parse(str(a.End))
 
-# Save to json
-apt_df.to_json("data/calendar.json", orient='records')
+        apptDict.append({
+            "title": str(a.Subject),
+            "start": start_date.strftime("%Y-%m-%d %H:%M:%S"),
+            "end": end_date.strftime("%Y-%m-%d %H:%M:%S"),
+        })
+
+    # Convert dictionary to dataframe
+    logging.info("Convert dictionary to dataframe")
+    apt_df = pd.DataFrame(apptDict)
+
+    # Save to json
+    logging.info("Save to json")
+    apt_df.to_json("data/calendar.json", orient='records')
+
+    # ---------- ENCRYPTION --------------
+    logging.info("ENCRYPTION")
+    with open('data/calendar.json','rb') as f:
+        data = f.read()
+
+    with open('crypto_key.key','rb') as file:
+        crypto_key = file.read()
+
+    fernet = Fernet(crypto_key)
+    encrypted = fernet.encrypt(data)
+
+    # Post to API
+    with open('api_key.key','rb') as file:
+        api_key = file.read()
+    payload = {"key": api_key, "data": encrypted}
+    headers = {'Content-type': 'application/json'}
+    r = requests.post('https://kasada.pythonanywhere.com/update-events', json=payload, headers=headers)
+
+    with open('data/calendar.json','wb') as f:
+        f.write(encrypted)
+
+
+if __name__ == '__main__':
+    try:
+        run()
+    except Exception as err:
+        logging.info(str(err))

@@ -11,10 +11,10 @@ def get_events():
         auth = json.load(file)
         if bcrypt.checkpw(request.json["key"].encode('utf8'), auth["key"].encode('utf8')):
             # "/home/kasada/mysite/calendar.json"
-            with open('data/calendar.json') as file:
-                events = json.load(file)
+            with open('data/calendar.json', 'rb') as file:
+                events = file.read()
 
-            return jsonify(events)
+            return jsonify({"data": events})
         
         else:
             return jsonify({"Error": "Key not valid"})
@@ -27,8 +27,8 @@ def update_events():
         auth = json.load(file)
         if bcrypt.checkpw(request.json["key"].encode('utf8'), auth["key"].encode('utf8')):
             # "/home/kasada/mysite/calendar.json"
-            with open('data/calendar.json', 'w') as file:
-                json.dump(request.json["data"], file)
+            with open('data/calendar.json', 'wb') as file:
+                file.write(request.json["data"])
 
             return "<p>Success: Calendar events updated</p>"
         
