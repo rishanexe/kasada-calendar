@@ -62,14 +62,19 @@ def run():
     encrypted = fernet.encrypt(data)
 
     # Post to API
+    logging.info("Post to API")
     with open('api_key.key','rb') as file:
         api_key = file.read()
     payload = {"key": api_key, "data": encrypted}
     headers = {'Content-type': 'application/json'}
     r = requests.post('https://kasada.pythonanywhere.com/update-events', json=payload, headers=headers)
 
+    # Save encrypted data to JSON
+    logging.info("Save encrypted data to JSON")
     with open('data/calendar.json','wb') as f:
         f.write(encrypted)
+
+    logging.info("------------------ DONE ------------------")
 
 
 if __name__ == '__main__':
