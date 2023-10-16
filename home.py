@@ -14,7 +14,7 @@ def calendar_view():
         },
         "slotMinTime": "08:00:00",
         "slotMaxTime": "20:00:00",
-        "initialView": "dayGridMonth",
+        "initialView": "dayGridWeek",
     }
 
     # Load key
