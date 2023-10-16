@@ -1,6 +1,7 @@
 .vscode
 .streamlit
 data/
+home/
 __pycache__/
 
 hasher.py

@@ -52,26 +52,28 @@ def run():
 
     # ---------- ENCRYPTION --------------
     logging.info("ENCRYPTION")
-    with open('data/calendar.json','rb') as f:
+    with open('data/calendar.json','r') as f:
         data = f.read()
 
     with open('crypto_key.key','rb') as file:
         crypto_key = file.read()
 
     fernet = Fernet(crypto_key)
-    encrypted = fernet.encrypt(data)
+    encrypted = fernet.encrypt(data.encode("utf8"))
 
     # Post to API
     logging.info("Post to API")
-    with open('api_key.key','rb') as file:
+    with open('api_key.key','r') as file:
         api_key = file.read()
-    payload = {"key": api_key, "data": encrypted}
+
+    payload = {"key": str(api_key), "data": encrypted.decode("utf8")}
     headers = {'Content-type': 'application/json'}
     r = requests.post('https://kasada.pythonanywhere.com/update-events', json=payload, headers=headers)
+    print(r.text)
 
     # Save encrypted data to JSON
     logging.info("Save encrypted data to JSON")
-    with open('data/calendar.json','wb') as f:
+    with open('data/calendar_encrypted.json','wb') as f:
         f.write(encrypted)
 
     logging.info("------------------ DONE ------------------")
@@ -81,4 +83,4 @@ if __name__ == '__main__':
     try:
         run()
     except Exception as err:
-        logging.error(str(err))
+        logging.exception(str(err))
