@@ -5,6 +5,7 @@ import pandas as pd
 from cryptography.fernet import Fernet
 import logging
 import requests
+import json
 
 logging.basicConfig(filename='data/log.log', filemode='a', format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s', level=logging.INFO)
 
@@ -31,29 +32,30 @@ def run():
 
     # Populate dictionary of meetings
     logging.info("Populate dictionary of meetings")
-    apptDict = []
+    apptDict = [[]]
     for a in appts:
         start_date = parse(str(a.Start))
         end_date = parse(str(a.End))
 
-        apptDict.append({
+        apptDict[0].append({
             "title": str(a.Subject),
             "start": start_date.strftime("%Y-%m-%d %H:%M:%S"),
             "end": end_date.strftime("%Y-%m-%d %H:%M:%S"),
         })
 
-    # Convert dictionary to dataframe
-    logging.info("Convert dictionary to dataframe")
-    apt_df = pd.DataFrame(apptDict)
+    # Updated timestamp
+    apptDict.append({"updated_on": datetime.datetime.now().strftime("%d %b %Y at %I:%M:%S %p")})
+
+    # Convert list to json    
+    data = json.dumps(apptDict)
 
     # Save to json
-    logging.info("Save to json")
-    apt_df.to_json("data/calendar.json", orient='records')
+    logging.info("Save to json file")
+    with open('data/calendar.json','w') as f:
+        f.write(data)
 
     # ---------- ENCRYPTION --------------
     logging.info("ENCRYPTION")
-    with open('data/calendar.json','r') as f:
-        data = f.read()
 
     with open('crypto_key.key','rb') as file:
         crypto_key = file.read()

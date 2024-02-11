@@ -29,4 +29,6 @@ def calendar_view():
     calendar_events = json.loads(calendar_events)
 
     # Render the calendar view
-    calendar_view = calendar(events=calendar_events, options=calendar_options)
+    calendar_view = calendar(events=calendar_events[0], options=calendar_options)
+
+    st.write(f"Updated on: {calendar_events[1]['updated_on']}")
