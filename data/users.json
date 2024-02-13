@@ -6,5 +6,9 @@
     {
         "username": "luke",
         "password": "$2b$12$WzDVXVQqQUt/MD5sbPPAp.q4DZ39qg53m2LHHHZjo1NdIahiX5ndK"
+    },
+    {
+        "username": "rishan",
+        "password": "$2b$12$JcrK5wEuYyNUgD53/6G9VO45FgaaCT/AlrbAB8HxmdGxcrzfF5yjK"
     }
 ]
