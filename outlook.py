@@ -70,7 +70,7 @@ def run():
 
     payload = {"key": str(api_key), "data": encrypted.decode("utf8")}
     headers = {'Content-type': 'application/json'}
-    r = requests.post('https://kasada.pythonanywhere.com/update-events', json=payload, headers=headers)
+    r = requests.post('https://kasada.pythonanywhere.com/update-events', json=payload, headers=headers, verify=False)
     print(r.text)
 
     # Save encrypted data to JSON
